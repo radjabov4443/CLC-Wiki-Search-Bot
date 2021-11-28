@@ -5,7 +5,11 @@ from telegram.update import Update
 from telegram.ext.filters import Filters
 import requests
 import settings
+import logging
 
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.DEBUG)
 
 updater = Updater(token=settings.TELEGRAM_TOKEN)
 
@@ -19,10 +23,13 @@ def start(update: Update, context: CallbackContext):
 def search(update: Update, context: CallbackContext):
     args = context.args
 
+    logging.info('checking args length')
+
     if len(args) == 0:
         update.message.reply_text('Hech bo\'lmasa nimadir kiriting. Misol uchun /search Amir Temur')
     else:
         search_text = ' '.join(args)
+        logging.info('sending request to Wikipedia API')
         response = requests.get('https://uz.wikipedia.org/w/api.php', {
             'action': 'opensearch',
             'search': search_text,
@@ -31,6 +38,7 @@ def search(update: Update, context: CallbackContext):
             'format': 'json',
         })
 
+        logging.info('result from Wikipedia API')
         result = response.json()
         link = result[3]
 
